@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interval Timer</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles to ensure a consistent look and feel */
+        body {
+            font-family: 'Inter', sans-serif;
+            touch-action: manipulation; /* Prevents double-tap zoom on mobile */
+        }
+        /* Style for the input fields */
+        .time-input {
+            background-color: transparent;
+            border: none;
+            color: white;
+            text-align: right;
+            font-size: 1rem;
+            width: 80px;
+            padding: 0.5rem;
+        }
+        .time-input:focus {
+            outline: none;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 0.375rem;
+        }
+        /* Transition for background color changes */
+        .timer-bg {
+            transition: background-color 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 flex items-center justify-center min-h-screen">
+
+    <div class="w-full max-w-sm mx-auto p-4">
+        <!-- Main Timer Container -->
+        <div id="timer-container" class="timer-bg text-white rounded-2xl p-8 flex flex-col items-center justify-center space-y-6 bg-gradient-to-br from-red-500 to-orange-500">
+            <h1 id="timer-phase" class="text-2xl font-bold tracking-wider uppercase">Work</h1>
+            <div id="timer-display" class="text-8xl font-black">
+                00:30
+            </div>
+            <!-- Play/Pause Button -->
+            <button id="start-pause-btn" class="bg-white/20 hover:bg-white/30 backdrop-blur-xl rounded-full w-24 h-24 flex items-center justify-center transition-transform transform hover:scale-105">
+                <svg id="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12 text-white">
+                    <path fill-rule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.647c1.295.742 1.295 2.545 0 3.286L7.279 20.99c-1.25.717-2.779-.217-2.779-1.643V5.653z" clip-rule="evenodd" />
+                </svg>
+                <svg id="pause-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12 text-white hidden">
+                    <path fill-rule="evenodd" d="M6.75 5.25a.75.75 0 01.75.75v12a.75.75 0 01-1.5 0v-12a.75.75 0 01.75-.75zm9 0a.75.75 0 01.75.75v12a.75.75 0 01-1.5 0v-12a.75.75 0 01.75-.75z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Configuration Settings -->
+        <div class="mt-6 space-y-2 text-white">
+            <!-- Work Setting -->
+            <div class="flex items-center justify-between bg-gray-800 p-3 rounded-lg">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-green-500/20 text-green-400 p-2 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" /></svg>
+                    </div>
+                    <span class="font-medium">Work</span>
+                </div>
+                <div>
+                    <input id="work-minutes" type="number" value="0" min="0" class="time-input">:<input id="work-seconds" type="number" value="30" min="0" max="59" class="time-input">
+                </div>
+            </div>
+            <!-- Rest Setting -->
+            <div class="flex items-center justify-between bg-gray-800 p-3 rounded-lg">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-red-500/20 text-red-400 p-2 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd" /></svg>
+                    </div>
+                    <span class="font-medium">Rest</span>
+                </div>
+                <div>
+                    <input id="rest-minutes" type="number" value="0" min="0" class="time-input">:<input id="rest-seconds" type="number" value="30" min="0" max="59" class="time-input">
+                </div>
+            </div>
+            <!-- Rounds Setting -->
+            <div class="flex items-center justify-between bg-gray-800 p-3 rounded-lg">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-blue-500/20 text-blue-400 p-2 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M4 2a1 1 0 00-1 1v2.101a7.002 7.002 0 0011.601 2.966a1 1 0 10-1.885.666A5.002 5.002 0 015.999 7H9a1 1 0 000-2H4V2zm11.899 10.101a7.002 7.002 0 00-11.601-2.966 1 1 0 10-1.885-.666A5.002 5.002 0 0114.001 13H11a1 1 0 100 2h5v-5a1 1 0 10-2 0v.101z" /></svg>
+                    </div>
+                    <span class="font-medium">Rounds</span>
+                </div>
+                <input id="rounds" type="number" value="3" min="1" class="time-input w-16 text-right pr-2">
+            </div>
+             <!-- Reset Button -->
+            <button id="reset-btn" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition-colors">
+                Reset
+            </button>
+        </div>
+    </div>
+
+     <div id="completion-message" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
+        <div class="bg-gray-800 text-white p-8 rounded-2xl text-center shadow-lg">
+            <h2 class="text-3xl font-bold mb-4">Workout Complete!</h2>
+            <button id="close-message-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition-colors">Done</button>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const timerDisplay = document.getElementById('timer-display');
+            const timerPhase = document.getElementById('timer-phase');
+            const timerContainer = document.getElementById('timer-container');
+            const startPauseBtn = document.getElementById('start-pause-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const playIcon = document.getElementById('play-icon');
+            const pauseIcon = document.getElementById('pause-icon');
+            const completionMessage = document.getElementById('completion-message');
+            const closeMessageBtn = document.getElementById('close-message-btn');
+
+            // Input Fields
+            const workMinutesInput = document.getElementById('work-minutes');
+            const workSecondsInput = document.getElementById('work-seconds');
+            const restMinutesInput = document.getElementById('rest-minutes');
+            const restSecondsInput = document.getElementById('rest-seconds');
+            const roundsInput = document.getElementById('rounds');
+
+            // Timer State
+            let timerInterval = null;
+            let isRunning = false;
+            let totalSeconds = 0;
+            let workDuration = 30;
+            let restDuration = 30;
+            let totalRounds = 3;
+            let currentRound = 1;
+            let isWorkPhase = true;
+
+            // Audio State
+            let audioCtx;
+            let isAudioReady = false;
+
+            /**
+             * Initializes the audio context. Must be called after a user interaction.
+             */
+            function initAudio() {
+                if (isAudioReady) return;
+                // Create AudioContext
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                isAudioReady = true;
+                console.log('Audio context started');
+            }
+
+            /**
+             * Plays a sound using the Web Audio API.
+             * @param {number} frequency - The frequency of the tone in Hz.
+             * @param {number} duration - The duration of the tone in milliseconds.
+             */
+            function playSound(frequency, duration) {
+                if (!isAudioReady) return;
+
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                oscillator.type = 'sine'; // sine wave is a clean tone
+                oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+                
+                // Fade out to prevent clicking sound
+                gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration / 1000);
+
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + duration / 1000);
+            }
+
+            // --- Core Functions ---
+
+            function updateDisplay() {
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+
+            function updatePhaseUI() {
+                if (isWorkPhase) {
+                    timerPhase.textContent = `Work (Round ${currentRound})`;
+                    timerContainer.className = 'timer-bg text-white rounded-2xl p-8 flex flex-col items-center justify-center space-y-6 bg-gradient-to-br from-green-500 to-teal-500';
+                } else {
+                    timerPhase.textContent = `Rest (Round ${currentRound})`;
+                    timerContainer.className = 'timer-bg text-white rounded-2xl p-8 flex flex-col items-center justify-center space-y-6 bg-gradient-to-br from-red-500 to-orange-500';
+                }
+            }
+
+            function tick() {
+                // *** UPDATED SOUND LOGIC ***
+                // Play the two-tone chime on 3, 2, and 1 seconds remaining.
+                if (totalSeconds === 3 || totalSeconds === 2 || totalSeconds === 1) {
+                    playSound(440, 100);
+                    setTimeout(() => playSound(880, 150), 120);
+                }
+
+                if (totalSeconds > 0) {
+                    totalSeconds--;
+                    updateDisplay();
+                } else {
+                    // Play a distinct, single high beep when the timer hits zero.
+                    playSound(1200, 200);
+
+                    if (isWorkPhase) {
+                        isWorkPhase = false;
+                        totalSeconds = restDuration;
+                        updatePhaseUI();
+                        updateDisplay();
+                    } else {
+                        currentRound++;
+                        if (currentRound > totalRounds) {
+                            // This is the final round completion
+                            playSound(1500, 80);
+                            setTimeout(() => playSound(1800, 80), 200);
+                            setTimeout(() => playSound(2200, 80), 400);
+                            completionMessage.classList.remove('hidden');
+                            completionMessage.classList.add('flex');
+                            resetTimer();
+                        } else {
+                            // This is a regular round completion
+                            isWorkPhase = true;
+                            totalSeconds = workDuration;
+                            updatePhaseUI();
+                            updateDisplay();
+                        }
+                    }
+                }
+            }
+            
+            function startTimer() {
+                if (isRunning || totalSeconds <= 0) return;
+                isRunning = true;
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+                playSound(600, 100); // Start sound
+                timerInterval = setInterval(tick, 1000);
+            }
+
+            function pauseTimer() {
+                if (!isRunning) return;
+                isRunning = false;
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+                clearInterval(timerInterval);
+                playSound(400, 100); // Pause sound
+            }
+
+            function resetTimer() {
+                pauseTimer(); 
+                workDuration = (parseInt(workMinutesInput.value) || 0) * 60 + (parseInt(workSecondsInput.value) || 0);
+                restDuration = (parseInt(restMinutesInput.value) || 0) * 60 + (parseInt(restSecondsInput.value) || 0);
+                totalRounds = parseInt(roundsInput.value) || 1;
+                currentRound = 1;
+                isWorkPhase = true;
+                totalSeconds = workDuration;
+                updatePhaseUI();
+                updateDisplay();
+            }
+
+            // --- Event Listeners ---
+            
+            const setupAudio = () => {
+                initAudio();
+                document.body.removeEventListener('click', setupAudio);
+                document.body.removeEventListener('touchend', setupAudio);
+            };
+            document.body.addEventListener('click', setupAudio);
+            document.body.addEventListener('touchend', setupAudio);
+
+            startPauseBtn.addEventListener('click', () => {
+                if (isRunning) {
+                    pauseTimer();
+                } else {
+                    startTimer();
+                }
+            });
+
+            resetBtn.addEventListener('click', () => {
+                resetTimer();
+                playSound(300, 100); // Reset sound
+            });
+            
+            closeMessageBtn.addEventListener('click', () => {
+                 completionMessage.classList.add('hidden');
+                 completionMessage.classList.remove('flex');
+            });
+
+            [workMinutesInput, workSecondsInput, restMinutesInput, restSecondsInput, roundsInput].forEach(input => {
+                input.addEventListener('change', resetTimer);
+            });
+            
+            resetTimer();
+        });
+    </script>
+</body>
+</html>
