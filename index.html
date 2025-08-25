@@ -140,39 +140,54 @@
             // Audio State
             let audioCtx;
             let isAudioReady = false;
+            
+            // --- Wake Lock ---
+            let wakeLock = null;
 
-            /**
-             * Initializes the audio context. Must be called after a user interaction.
-             */
+            // Function to acquire the wake lock
+            const acquireWakeLock = async () => {
+                // Check if the Screen Wake Lock API is supported
+                if ('wakeLock' in navigator) {
+                    try {
+                        wakeLock = await navigator.wakeLock.request('screen');
+                        console.log('Screen Wake Lock is active.');
+                    } catch (err) {
+                        // The request can fail if the document is not visible, or if the feature
+                        // is disallowed by a permissions policy. We'll log this gracefully.
+                        console.log(`Screen Wake Lock request failed: ${err.name}, ${err.message}`);
+                    }
+                } else {
+                    console.log('Screen Wake Lock API is not supported in this browser.');
+                }
+            };
+
+            // Function to release the wake lock
+            const releaseWakeLock = async () => {
+                if (wakeLock !== null) {
+                    await wakeLock.release();
+                    wakeLock = null;
+                    console.log('Screen Wake Lock released.');
+                }
+            };
+
+
             function initAudio() {
                 if (isAudioReady) return;
-                // Create AudioContext
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 isAudioReady = true;
                 console.log('Audio context started');
             }
 
-            /**
-             * Plays a sound using the Web Audio API.
-             * @param {number} frequency - The frequency of the tone in Hz.
-             * @param {number} duration - The duration of the tone in milliseconds.
-             */
             function playSound(frequency, duration) {
                 if (!isAudioReady) return;
-
                 const oscillator = audioCtx.createOscillator();
                 const gainNode = audioCtx.createGain();
-
                 oscillator.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
-
-                oscillator.type = 'sine'; // sine wave is a clean tone
+                oscillator.type = 'sine';
                 oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
-                
-                // Fade out to prevent clicking sound
                 gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration / 1000);
-
                 oscillator.start();
                 oscillator.stop(audioCtx.currentTime + duration / 1000);
             }
@@ -196,20 +211,15 @@
             }
 
             function tick() {
-                // *** UPDATED SOUND LOGIC ***
-                // Play the two-tone chime on 3, 2, and 1 seconds remaining.
-                if (totalSeconds === 3 || totalSeconds === 2 || totalSeconds === 1) {
-                    playSound(440, 100);
-                    setTimeout(() => playSound(880, 150), 120);
+                if (totalSeconds === 4 || totalSeconds === 3 || totalSeconds === 2) {
+                    playSound(880, 100);
                 }
 
                 if (totalSeconds > 0) {
                     totalSeconds--;
                     updateDisplay();
                 } else {
-                    // Play a distinct, single high beep when the timer hits zero.
                     playSound(1200, 200);
-
                     if (isWorkPhase) {
                         isWorkPhase = false;
                         totalSeconds = restDuration;
@@ -218,15 +228,13 @@
                     } else {
                         currentRound++;
                         if (currentRound > totalRounds) {
-                            // This is the final round completion
                             playSound(1500, 80);
                             setTimeout(() => playSound(1800, 80), 200);
                             setTimeout(() => playSound(2200, 80), 400);
                             completionMessage.classList.remove('hidden');
                             completionMessage.classList.add('flex');
-                            resetTimer();
+                            resetTimer(); // This will release the wake lock
                         } else {
-                            // This is a regular round completion
                             isWorkPhase = true;
                             totalSeconds = workDuration;
                             updatePhaseUI();
@@ -236,22 +244,24 @@
                 }
             }
             
-            function startTimer() {
+            async function startTimer() {
                 if (isRunning || totalSeconds <= 0) return;
+                await acquireWakeLock(); // Acquire lock before starting
                 isRunning = true;
                 playIcon.classList.add('hidden');
                 pauseIcon.classList.remove('hidden');
-                playSound(600, 100); // Start sound
+                playSound(600, 100);
                 timerInterval = setInterval(tick, 1000);
             }
 
-            function pauseTimer() {
+            async function pauseTimer() {
                 if (!isRunning) return;
+                await releaseWakeLock(); // Release lock on pause
                 isRunning = false;
                 playIcon.classList.remove('hidden');
                 pauseIcon.classList.add('hidden');
                 clearInterval(timerInterval);
-                playSound(400, 100); // Pause sound
+                playSound(400, 100);
             }
 
             function resetTimer() {
@@ -286,7 +296,7 @@
 
             resetBtn.addEventListener('click', () => {
                 resetTimer();
-                playSound(300, 100); // Reset sound
+                playSound(300, 100);
             });
             
             closeMessageBtn.addEventListener('click', () => {
