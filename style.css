@@ -1,0 +1,131 @@
+:root {
+    --bg-color: #121212;
+    --surface-color: #1e1e1e;
+    --primary-color: #ff4757;
+    --text-color: #ffffff;
+    --text-secondary-color: #a0a0a0;
+    --work-color: #2ed573;
+    --rest-color: #ff6348;
+    --ready-color: #ffa502;
+    --reset-color: #feca57;
+}
+
+body {
+    font-family: 'Roboto Mono', monospace;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    -webkit-tap-highlight-color: transparent; /* Disable tap highlight on mobile */
+}
+
+.timer-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.status-display {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    transition: color 0.5s ease;
+}
+
+.timer-display {
+    font-size: 6rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.main-controls {
+    margin-bottom: 30px;
+}
+
+.start-pause-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--primary-color);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    transition: background-color 0.3s ease;
+}
+
+.start-pause-btn:hover {
+    background-color: #e03e4d;
+}
+
+.start-pause-btn svg {
+    width: 40px;
+    height: 40px;
+}
+
+.settings {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.setting-item {
+    background-color: var(--surface-color);
+    padding: 15px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.1rem;
+}
+
+.setting-item label {
+    color: var(--text-secondary-color);
+}
+
+.setting-item input {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1.2rem;
+    width: 60px;
+    text-align: right;
+    font-weight: bold;
+    outline: none;
+}
+/* Hides the arrows from number inputs */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.reset-btn {
+    background-color: var(--surface-color);
+    border: none;
+    color: var(--text-secondary-color);
+    padding: 15px 20px;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+.reset-btn:hover {
+    background-color: #333;
+}
